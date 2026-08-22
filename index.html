@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>💈 سامانه نوبت‌دهی آرایشگاه</title>
+  <style>
+    :root {
+      --primary: #1a1a2e;
+      --primary-light: #2a2a4e;
+      --gold: #d4a373;
+      --gold-light: #f0d5b0;
+      --gold-dark: #b8865a;
+      --bg: #f8f5f0;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --text-light: #4a4a6a;
+      --text-muted: #8888aa;
+      --border: #e0d8d0;
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 15px 50px rgba(0, 0, 0, 0.15);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --header-h: 70px;
+      --font: 'Segoe UI', 'Vazir', Tahoma, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      padding: 0 16px 30px;
+      min-height: 100vh;
+      transition: background var(--transition);
+    }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; outline: none; border: none; }
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+    .header {
+      background: var(--primary);
+      color: #fff;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-radius: 0 0 var(--radius) var(--radius);
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+      margin: 0 -16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: background var(--transition);
+    }
+    .header-brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.3rem; }
+    .header-brand span {
+      background: var(--gold);
+      color: var(--primary);
+      font-size: 0.6rem;
+      padding: 2px 14px;
+      border-radius: 40px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .header-actions button {
+      color: #fff;
+      font-size: 1.2rem;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.06);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-actions button:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+    .user-badge {
+      background: var(--gold);
+      color: var(--primary);
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: none;
+    }
+    .menu-btn { font-size: 1.4rem; display: none; }
+    .nav {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 8px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      transition: all var(--transition);
+    }
+    .nav a {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav a:hover, .nav a.active {
+      background: var(--gold);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3);
+    }
+    .nav a.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(26, 26, 46, 0.3);
+    }
+    @media (max-width: 768px) {
+      .menu-btn { display: block; }
+      .nav { display: none; flex-direction: column; align-items: stretch; padding: 12px; }
+      .nav.open { display: flex; }
+      .nav a { justify-content: center; padding: 12px; }
+      .user-badge { font-size: 0.7rem; padding: 4px 12px; }
+    }
+    .page { display: none; animation: fadeUp 0.4s ease; }
+    .page.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: all var(--transition);
+      margin-bottom: 20px;
+    }
+    .card:hover { box-shadow: var(--shadow-hover); }
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+    }
+    .btn {
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(26, 26, 46, 0.2); }
+    .btn-gold { background: var(--gold); color: var(--primary); }
+    .btn-gold:hover { background: var(--gold-dark); color: #fff; }
+    .btn-success { background: #2d8a4e; color: #fff; }
+    .btn-danger { background: #c0392b; color: #fff; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-sm { padding: 6px 16px; font-size: 0.8rem; }
+    .btn-block { width: 100%; justify-content: center; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; color: var(--text-light); }
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      transition: all var(--transition);
+    }
+    .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.15); }
+    .form-control::placeholder { color: var(--text-muted); opacity: 0.7; }
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a4a6a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 16px center;
+      padding-left: 40px;
+    }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 992px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    .service-card, .barber-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      text-align: center;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+    .service-card:hover, .barber-card:hover { border-color: var(--gold); transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .service-card.selected, .barber-card.selected { border-color: var(--gold); background: rgba(212, 163, 115, 0.08); box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.12); }
+    .service-card .icon { font-size: 2.4rem; margin-bottom: 6px; }
+    .service-card .name { font-weight: 700; font-size: 1.05rem; }
+    .service-card .price { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+    .service-card .duration { font-size: 0.8rem; background: var(--bg); padding: 2px 14px; border-radius: 40px; display: inline-block; margin-top: 6px; }
+    .barber-card .avatar {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700; margin: 0 auto 10px;
+      border: 3px solid var(--gold);
+    }
+    .barber-card .name { font-weight: 700; font-size: 1.05rem; }
+    .barber-card .exp { font-size: 0.85rem; color: var(--text-muted); }
+    .barber-card .rating { color: #f1c40f; font-size: 0.9rem; margin-top: 4px; }
+    .time-slots { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .time-slot {
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      background: var(--bg);
+      font-weight: 500;
+      transition: all var(--transition);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .time-slot:hover:not(.booked):not(.disabled) { border-color: var(--gold); background: var(--gold); color: #fff; }
+    .time-slot.selected { border-color: var(--gold); background: var(--gold); color: #fff; box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3); }
+    .time-slot.booked { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+    .time-slot.disabled { opacity: 0.3; cursor: not-allowed; }
+    .appointment-item {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      border-right: 4px solid var(--gold);
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all var(--transition);
+    }
+    .appointment-item:hover { box-shadow: var(--shadow); }
+    .appointment-item .info { display: flex; flex-direction: column; gap: 2px; }
+    .appointment-item .info .title { font-weight: 700; font-size: 1.05rem; }
+    .appointment-item .info .sub { font-size: 0.9rem; color: var(--text-muted); }
+    .appointment-item .status { padding: 4px 16px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; }
+    .status.pending { background: #fff3cd; color: #856404; }
+    .status.confirmed { background: #d4edda; color: #155724; }
+    .status.rejected { background: #f8d7da; color: #721c24; }
+    .status.completed { background: #cce5ff; color: #004085; }
+    .status.cancelled { background: #f8d7da; color: #721c24; }
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      max-width: 540px;
+      width: 100%;
+      padding: 32px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeUp 0.3s ease;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+    .modal-box .modal-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+    .modal-box .close-btn { float: left; font-size: 1.6rem; color: var(--text-muted); cursor: pointer; transition: color var(--transition); }
+    .modal-box .close-btn:hover { color: #c0392b; }
+    .toast-container {
+      position: fixed; top: 90px; left: 20px;
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 380px;
+      width: 100%;
+    }
+    .toast {
+      background: var(--card);
+      border-right: 5px solid var(--gold);
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-hover);
+      animation: slideIn 0.4s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--border);
+    }
+    .toast.success { border-right-color: #2d8a4e; }
+    .toast.error { border-right-color: #c0392b; }
+    .toast.warning { border-right-color: #e67e22; }
+    .toast .toast-msg { flex: 1; font-weight: 500; font-size: 0.95rem; }
+    .toast .toast-close { cursor: pointer; font-size: 1.2rem; color: var(--text-muted); }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    .setting-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .setting-row label { font-weight: 600; min-width: 140px; font-size: 0.9rem; }
+    .setting-row input, .setting-row select { flex: 1; min-width: 140px; }
+    .setting-row .hint { font-size: 0.75rem; color: var(--text-muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    table th { background: var(--primary); color: #fff; padding: 12px 16px; text-align: right; font-weight: 600; }
+    table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    table tr:hover td { background: rgba(212, 163, 115, 0.04); }
+    .badge-pill { padding: 2px 14px; border-radius: 40px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-gold { background: var(--gold); color: #fff; }
+    .badge-success { background: #2d8a4e; color: #fff; }
+    .badge-danger { background: #c0392b; color: #fff; }
+    .badge-secondary { background: var(--text-muted); color: #fff; }
+    .badge-warning { background: #f1c40f; color: var(--primary); }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .empty-state i { font-size: 4rem; color: var(--border); margin-bottom: 16px; }
+    .empty-state h3 { font-size: 1.2rem; color: var(--text-light); }
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); }
+    .mt-8 { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mb-8 { margin-bottom: 8px; }
+    .mb-16 { margin-bottom: 16px; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .hidden { display: none !important; }
+    .review-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .review-item:last-child { border-bottom: none; }
+    .review-item .review-header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .review-item .review-header .name { font-weight: 700; }
+    .review-item .review-header .date { font-size: 0.8rem; color: var(--text-muted); }
+    .review-item .review-text { margin-top: 4px; font-size: 0.95rem; }
+    .footer {
+      text-align: center;
+      padding: 30px 0 10px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 30px;
+    }
+    #authPage { max-width: 460px; margin: 40px auto; }
+    #authPage .auth-logo { text-align: center; margin-bottom: 24px; }
+    #authPage .auth-logo i { font-size: 4rem; color: var(--gold); }
+    #authPage .auth-logo h1 { font-size: 1.8rem; margin-top: 6px; color: var(--primary); }
+    #authPage .auth-logo p { color: var(--text-muted); font-size: 0.95rem; }
+    .auth-tabs {
+      display: flex;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 2px solid var(--gold);
+      margin-bottom: 24px;
+    }
+    .auth-tabs button {
+      flex: 1;
+      padding: 12px;
+      background: var(--card);
+      font-weight: 600;
+      transition: all var(--transition);
+      border: none;
+      font-size: 1rem;
+    }
+    .auth-tabs button.active { background: var(--gold); color: var(--primary); }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .auth-form .form-group { margin-bottom: 18px; }
+    .no-placeholder::placeholder { color: transparent !important; }
+    .stars { display: flex; gap: 8px; font-size: 2rem; }
+    .star { cursor: pointer; color: #ddd; transition: color 0.2s; }
+    .star.active { color: #f1c40f; }
+    @media (max-width: 480px) {
+      .header-brand { font-size: 1rem; }
+      .header-brand span { font-size: 0.5rem; padding: 1px 10px; }
+      .header-actions button { padding: 6px 10px; font-size: 1rem; }
+      .card { padding: 16px; }
+      .appointment-item { flex-direction: column; align-items: stretch; text-align: center; }
+      .modal-box { padding: 20px; margin: 10px; }
+      #authPage { margin: 20px auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-brand">💈 آرایشگاه <span>حرفه‌ای</span></div>
+    <div class="header-actions">
+      <span class="user-badge" id="userBadge"></span>
+      <button id="themeToggle">🌙</button>
+      <button class="menu-btn" id="menuToggle">☰</button>
+      <button id="logoutBtn" style="display:none;">🚪</button>
+    </div>
+  </header>
+
+  <nav class="nav hidden" id="mainNav">
+    <a href="#" data-page="home" class="active">🏠 خانه</a>
+    <a href="#" data-page="booking">📅 نوبت‌گیری</a>
+    <a href="#" data-page="appointments">📋 نوبت‌های من</a>
+    <a href="#" data-page="settings" id="navSettings" style="display:none;">⚙️ تنظیمات</a>
+    <a href="#" data-page="admin" id="navAdmin" style="display:none;">🛡️ مدیریت</a>
+    <a href="#" data-page="users" id="navUsers" style="display:none;">👥 کاربران</a>
+  </nav>
+
+  <div class="container">
+    <div id="authPage" class="page active">
+      <div class="card" style="padding:32px;">
+        <div class="auth-logo">
+          <div style="font-size:4rem;">💈</div>
+          <h1>آرایشگاه حرفه‌ای</h1>
+          <p>به سامانه مدیریت نوبت‌دهی خوش آمدید</p>
+        </div>
+        <div class="auth-tabs">
+          <button class="active" data-tab="login">ورود</button>
+          <button data-tab="register">ثبت‌نام</button>
+        </div>
+        <div class="auth-form active" id="loginForm">
+          <div class="form-group"><label>شماره تلفن</label><input class="form-control" id="loginPhone" placeholder="شماره تلفن خود را وارد کنید"></div>
+          <div class="form-group"><label>رمز عبور</label><input class="form-control no-placeholder" id="loginPassword" type="password"></div>
+          <button class="btn btn-gold btn-block" id="loginBtn">ورود</button>
+          <div id="loginError" class="text-muted mt-8" style="color:#c0392b;font-size:0.85rem;"></div>
+        </div>
+        <div class="auth-form" id="registerForm">
+          <div class="form-group"><label>نام و نام خانوادگی</label><input class="form-control" id="regName" placeholder="نام خود را وارد کنید"></div>
+          <div class="form-group"><label>شماره تلفن</label><input class="form-control" id="regPhone" placeholder="شماره تلفن خود را وارد کنید"></div>
+          <div class="form-group"><label>رمز عبور</label><input class="form-control no-placeholder" id="regPassword" type="password"></div>
+          <button class="btn btn-gold btn-block" id="registerBtn">ثبت‌نام</button>
+          <div id="registerError" class="text-muted mt-8" style="color:#c0392b;font-size:0.85rem;"></div>
+        </div>
+      </div>
+      <div class="text-muted text-center" style="font-size:0.8rem;margin-top:6px;">ℹ️ .............</div>
+    </div>
+
+    <div id="appPages" style="display:none;">
+      <div class="page active" id="page-home">
+        <div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;padding:28px;">
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="flex:1;">
+              <h1 style="font-size:2rem;margin-bottom:4px;">💈 خوش آمدید</h1>
+              <p style="opacity:0.9;font-size:1.05rem;">بهترین خدمات آرایشگری با تیمی حرفه‌ای</p>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                <span style="background:rgba(255,255,255,0.12);padding:4px 18px;border-radius:40px;font-size:0.85rem;">⭐ ۴.۹ از ۵</span>
+                <span style="background:rgba(255,255,255,0.12);padding:4px 18px;border-radius:40px;font-size:0.85rem;">👥 ۱۲۰۰+ مشتری</span>
+                <span style="background:rgba(255,255,255,0.12);padding:4px 18px;border-radius:40px;font-size:0.85rem;" id="homeHours">🕒 ۹:۰۰ - ۲۱:۰۰</span>
+              </div>
+            </div>
+            <div style="font-size:4rem;opacity:0.15;">💈</div>
+          </div>
+        </div>
+        <h2 class="card-title">✂️ خدمات</h2>
+        <div class="grid-3" id="homeServices"></div>
+        <h2 class="card-title" style="margin-top:16px;">👔 آرایشگران</h2>
+        <div class="grid-3" id="homeBarbers"></div>
+        <h2 class="card-title" style="margin-top:16px;">💬 نظرات</h2>
+        <div class="card" id="homeReviews"></div>
+      </div>
+
+      <div class="page" id="page-booking">
+        <div class="card">
+          <div class="card-title">✅ نوبت‌گیری جدید</div>
+          <div id="bookingStep1">
+            <h3 style="margin-bottom:12px;">۱. انتخاب سرویس</h3>
+            <div class="grid-3" id="bookingServices"></div>
+            <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn" id="bookingNext1" disabled>ادامه ⬅️</button></div>
+          </div>
+          <div id="bookingStep2" style="display:none;">
+            <h3 style="margin-bottom:12px;">۲. انتخاب آرایشگر و تاریخ</h3>
+            <div class="grid-2">
+              <div>
+                <label style="font-weight:600;">آرایشگر</label>
+                <div class="grid-2" id="bookingBarbers" style="margin-top:8px;"></div>
+              </div>
+              <div>
+                <label style="font-weight:600;">تاریخ</label>
+                <div class="grid-3" style="margin-top:8px;">
+                  <select class="form-control" id="bookingYear"></select>
+                  <select class="form-control" id="bookingMonth"></select>
+                  <select class="form-control" id="bookingDay"></select>
+                </div>
+                <div style="margin-top:14px;"><label style="font-weight:600;">ساعت</label><div class="time-slots" id="bookingTimes"></div></div>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <button class="btn btn-outline" id="bookingBack1">➡️ قبلی</button>
+              <button class="btn" id="bookingNext2" disabled>ادامه ⬅️</button>
+            </div>
+          </div>
+          <div id="bookingStep3" style="display:none;">
+            <h3 style="margin-bottom:12px;">۳. تأیید نوبت</h3>
+            <div class="grid-2">
+              <div class="form-group"><label>نام و نام خانوادگی</label><input class="form-control" id="bookingName"></div>
+              <div class="form-group"><label>شماره تماس</label><input class="form-control" id="bookingPhone"></div>
+            </div>
+            <div class="form-group"><label>توضیحات (اختیاری)</label><textarea class="form-control" id="bookingNote" rows="2" placeholder="نکته خاصی دارید؟"></textarea></div>
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:8px;">
+              <button class="btn btn-outline" id="bookingBack2">➡️ قبلی</button>
+              <button class="btn btn-success" id="bookingSubmit">✅ ثبت نوبت</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-appointments">
+        <div class="card">
+          <div class="card-title">📅 نوبت‌های من</div>
+          <div id="appointmentsList"></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-settings">
+        <div class="card">
+          <div class="card-title">⚙️ تنظیمات پیشرفته</div>
+          <div id="settingsContent">
+            <h4 style="margin:8px 0 10px;color:var(--primary);">🕒 زمان‌بندی کاری</h4>
+            <div class="setting-row"><label>ساعت شروع</label><input type="time" id="setStartTime" class="form-control" style="flex:1;"></div>
+            <div class="setting-row"><label>ساعت پایان</label><input type="time" id="setEndTime" class="form-control" style="flex:1;"></div>
+            <div class="setting-row"><label>فاصله نوبت‌ها (دقیقه)</label><input type="number" id="setSlotInterval" class="form-control" style="flex:1;max-width:160px;" min="5" max="60"></div>
+            <div class="setting-row"><label>حداکثر نوبت در هر ساعت</label><input type="number" id="setMaxPerHour" class="form-control" style="flex:1;max-width:160px;" min="1" max="10"></div>
+            <div class="setting-row"><label>روزهای تعطیل (کد)</label><input type="text" id="setHolidays" class="form-control" style="flex:1;" placeholder="مثال: 5,6 (پنجشنبه و جمعه)"><span class="hint">۰=شنبه ... ۶=جمعه</span></div>
+            <button class="btn btn-gold mt-16" id="saveSettingsBtn">💾 ذخیره تنظیمات</button>
+            <div id="settingsStatus" style="margin-top:8px;font-size:0.9rem;color:var(--gold);"></div>
+            <hr style="margin:24px 0;border-color:var(--border);">
+            <div class="flex-between"><h4 style="color:var(--primary);">✂️ مدیریت خدمات</h4><button class="btn btn-sm btn-gold" id="adminAddService">➕ افزودن</button></div>
+            <div id="adminServicesList" class="mt-8"></div>
+            <hr style="margin:24px 0;border-color:var(--border);">
+            <div class="flex-between"><h4 style="color:var(--primary);">👔 مدیریت آرایشگران</h4><button class="btn btn-sm btn-gold" id="adminAddBarber">➕ افزودن</button></div>
+            <div id="adminBarbersList" class="mt-8"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-admin">
+        <div class="card">
+          <div class="card-title">📋 مدیریت نوبت‌ها</div>
+          <div class="flex-between mb-8"><span></span><button class="btn btn-sm btn-gold" id="adminExport">📤 خروجی</button></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>مشتری</th><th>سرویس</th><th>آرایشگر</th><th>تاریخ</th><th>ساعت</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="adminAppointmentsTable"></tbody></table></div>
+          <div id="adminReviewsContainer" style="margin-top:24px;"><div class="card-title">⭐ نظرات</div><div id="adminReviewsList"></div></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-users">
+        <div class="card">
+          <div class="card-title">👥 مدیریت کاربران</div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>نام</th><th>تلفن</th><th>نقش</th><th>عملیات</th></tr></thead><tbody id="usersTable"></tbody></table></div>
+          <button class="btn btn-gold mt-16" id="addUserBtn">➕ افزودن کاربر</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">💈 آرایشگاه حرفه‌ای &bull; سامانه نوبت‌دهی پیشرفته</div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <span class="close-btn" id="modalClose">&times;</span>
+      <div class="modal-title" id="modalTitle">✏️ عنوان</div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // ============================================
+    // Supabase Configuration - این دو مقدار را جایگزین کنید
+    // ============================================
+    const SUPABASE_URL = "https://suejmbghkyrowrakofw.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1ZWptYmZnaGt5cm93cmFrb2Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MTI2MzMsImV4cCI6MjEwMjk4ODYzM30.e1Ia5xAzq_h1z89umV0yS_qBegUfWKtmndxtWjdj3BQ";
+
+    // ============================================
+    // توابع کمکی تاریخ شمسی (بدون وابستگی خارجی)
+    // ============================================
+    function div(a, b) { return Math.floor(a / b); }
+    function mod(a, b) { return a - Math.floor(a / b) * b; }
+
+    function gregorianToJalali(gy, gm, gd) {
+      var jy, jm, jd;
+      var g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      var gy2 = (gm > 2) ? (gy + 1) : gy;
+      var days = 355666 + (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      jy = -1595 + (33 * Math.floor(days / 12053));
+      days = mod(days, 12053);
+      jy += 4 * Math.floor(days / 1461);
+      days = mod(days, 1461);
+      if (days > 365) {
+        jy += Math.floor((days - 1) / 365);
+        days = mod(days - 1, 365);
+      }
+      if (days < 186) {
+        jm = 1 + Math.floor(days / 31);
+        jd = 1 + mod(days, 31);
+      } else {
+        jm = 7 + Math.floor((days - 186) / 30);
+        jd = 1 + mod(days - 186, 30);
+      }
+      return { jy, jm, jd };
+    }
+
+    function jalaliToGregorian(jy, jm, jd) {
+      var gy, gm, gd;
+      if (jy > 979) {
+        gy = 1600;
+        jy -= 979;
+      } else {
+        gy = 621;
+      }
+      var days = (365 * jy) + (Math.floor(jy / 33) * 8) + Math.floor(((jy % 33) + 3) / 4) + 78 + jd + ((jm - 1) * 31) - Math.floor((jm - 1) / 7) * (jm - 1);
+      gy += 400 * Math.floor(days / 146097);
+      days = mod(days, 146097);
+      if (days > 36524) {
+        gy += 100 * Math.floor(--days / 36524);
+        days = mod(days, 36524);
+        if (days >= 365) days++;
+      }
+      gy += 4 * Math.floor(days / 1461);
+      days = mod(days, 1461);
+      if (days > 365) {
+        gy += Math.floor((days - 1) / 365);
+        days = mod(days - 1, 365);
+      }
+      gd = days + 1;
+      var sal_a = [0, 31, ((gy % 4 == 0 && gy % 100 != 0) || (gy % 400 == 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      gm = 0;
+      while (gm < 13 && gd > sal_a[gm]) gd -= sal_a[gm++];
+      return { gy, gm, gd };
+    }
+
+    function isLeapJalali(year) {
+      return (year % 33 === 1 || year % 33 === 5 || year % 33 === 9 || year % 33 === 13 || year % 33 === 17 || year % 33 === 22 || year % 33 === 26 || year % 33 === 30);
+    }
+
+    function jalaliMonthLength(year, month) {
+      if (month <= 6) return 31;
+      if (month <= 11) return 30;
+      return isLeapJalali(year) ? 30 : 29;
+    }
+
+    function toJalaaliStr(gy, gm, gd) {
+      const j = gregorianToJalali(gy, gm, gd);
+      return `${j.jy}/${String(j.jm).padStart(2, '0')}/${String(j.jd).padStart(2, '0')}`;
+    }
+
+    function toGregorianStr(jy, jm, jd) {
+      const g = jalaliToGregorian(jy, jm, jd);
+      return `${g.gy}-${String(g.gm).padStart(2, '0')}-${String(g.gd).padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // توابع ارتباط با Supabase
+    // ============================================
+    async function supabaseFetch(path, options = {}) {
+      const url = `${SUPABASE_URL}/rest/v1/${path}`;
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      };
+      const response = await fetch(url, { ...options, headers });
+      if (!response.ok) {
+        throw new Error(`Supabase error: ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function loadAllData() {
+      try {
+        const [configData, servicesData, barbersData, reviewsData, appointmentsData, usersData] = await Promise.all([
+          supabaseFetch('config?select=*'),
+          supabaseFetch('services?select=*'),
+          supabaseFetch('barbers?select=*'),
+          supabaseFetch('reviews?select=*'),
+          supabaseFetch('appointments?select=*'),
+          supabaseFetch('users?select=*')
+        ]);
+        state.config = configData[0] || { ...DEFAULT_CONFIG };
+        state.services = servicesData.length ? servicesData : [...DEFAULT_SERVICES];
+        state.barbers = barbersData.length ? barbersData : [...DEFAULT_BARBERS];
+        state.reviews = reviewsData.length ? reviewsData : [...DEFAULT_REVIEWS];
+        state.appointments = appointmentsData || [];
+        state.users = usersData.length ? usersData : [...DEFAULT_USERS];
+
+        if (usersData.length === 0) {
+          await seedDefaultData();
+          return loadAllData();
+        }
+
+        const savedUserId = sessionStorage.getItem('barber_session');
+        if (savedUserId) {
+          state.currentUser = state.users.find(u => u.id === savedUserId) || null;
+          if (state.currentUser && state.currentUser.role === 'barber') {
+            const barber = state.barbers.find(b => b.userId === state.currentUser.phone);
+            state.currentBarberId = barber ? barber.id : null;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast('خطا در بارگذاری داده‌ها', 'error');
+      }
+    }
+
+    async function seedDefaultData() {
+      const batch = [
+        ...DEFAULT_USERS.map(u => supabaseFetch('users', { method: 'POST', body: JSON.stringify(u) })),
+        ...DEFAULT_SERVICES.map(s => supabaseFetch('services', { method: 'POST', body: JSON.stringify(s) })),
+        ...DEFAULT_BARBERS.map(b => supabaseFetch('barbers', { method: 'POST', body: JSON.stringify(b) })),
+        ...DEFAULT_REVIEWS.map(r => supabaseFetch('reviews', { method: 'POST', body: JSON.stringify(r) })),
+        supabaseFetch('config', { method: 'POST', body: JSON.stringify(DEFAULT_CONFIG) })
+      ];
+      await Promise.all(batch);
+    }
+
+    async function saveAllData() {
+      try {
+        const batch = [
+          supabaseFetch('config?select=*', { method: 'POST', body: JSON.stringify(state.config) }),
+          ...state.services.map(s => supabaseFetch('services', { method: 'POST', body: JSON.stringify(s) })),
+          ...state.barbers.map(b => supabaseFetch('barbers', { method: 'POST', body: JSON.stringify(b) })),
+          ...state.reviews.map(r => supabaseFetch('reviews', { method: 'POST', body: JSON.stringify(r) })),
+          ...state.appointments.map(a => supabaseFetch('appointments', { method: 'POST', body: JSON.stringify(a) })),
+          ...state.users.map(u => supabaseFetch('users', { method: 'POST', body: JSON.stringify(u) }))
+        ];
+        await Promise.all(batch);
+      } catch (error) {
+        console.error('Error saving data:', error);
+        toast('خطا در ذخیره‌سازی', 'error');
+      }
+    }
+
+    async function updateDocument(table, id, data) {
+      await supabaseFetch(`${table}?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+    }
+
+    async function deleteDocument(table, id) {
+      await supabaseFetch(`${table}?id=eq.${id}`, { method: 'DELETE' });
+    }
+
+    // ============================================
+    // متغیرها و توابع اصلی
+    // ============================================
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+    function normalizePhone(phone) {
+      if (!phone) return '';
+      const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+      const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+      let out = phone.toString();
+      for (let i = 0; i < 10; i++) {
+        out = out.replace(new RegExp(persianDigits[i], 'g'), i);
+        out = out.replace(new RegExp(arabicDigits[i], 'g'), i);
+      }
+      return out.replace(/\D/g, '');
+    }
+
+    function simpleHash(str) { let hash = 5381; for (let i = 0; i < str.length; i++) hash = ((hash << 5) + hash) + str.charCodeAt(i); return (hash >>> 0).toString(16); }
+
+    const DEFAULT_CONFIG = { startTime: '09:00', endTime: '21:00', slotInterval: 30, maxPerHour: 4, holidays: '5,6' };
+    const DEFAULT_SERVICES = [
+      { id: 's1', name: 'قیچی', price: 150000, duration: 30, icon: '✂️' },
+      { id: 's2', name: 'ماشین', price: 120000, duration: 25, icon: '🪒' },
+      { id: 's3', name: 'اصلاح ریش', price: 80000, duration: 20, icon: '🧔' },
+      { id: 's4', name: 'اصلاح کامل', price: 100000, duration: 25, icon: '🪒' },
+      { id: 's5', name: 'رنگ مو', price: 200000, duration: 45, icon: '🎨' },
+      { id: 's6', name: 'ماساژ سر', price: 70000, duration: 15, icon: '💆‍♂️' }
+    ];
+    const DEFAULT_BARBERS = [
+      { id: 'b1', name: 'علی مرادی', exp: '۵ سال', avatar: 'ع', rating: 4.9, userId: '09120000001' },
+      { id: 'b2', name: 'رضا کریمی', exp: '۸ سال', avatar: 'ر', rating: 4.8, userId: '09120000002' },
+      { id: 'b3', name: 'محمد حسینی', exp: '۳ سال', avatar: 'م', rating: 4.6, userId: '09120000003' }
+    ];
+    const DEFAULT_REVIEWS = [
+      { id: 'r1', name: 'امیر رضایی', text: 'عالی! بهترین آرایشگاه شهر.', rating: 5, date: '۱۴۰۲/۱۱/۱۲' },
+      { id: 'r2', name: 'سارا محمدی', text: 'پسرم خیلی راضی بود.', rating: 4, date: '۱۴۰۲/۱۱/۱۰' }
+    ];
+    const DEFAULT_USERS = [
+      { id: 'u1', name: 'مدیر سیستم', phone: '09123456789', password: simpleHash('admin123'), role: 'admin' },
+      { id: 'u2', name: 'علی مرادی', phone: '09120000001', password: simpleHash('1234'), role: 'barber' },
+      { id: 'u3', name: 'رضا کریمی', phone: '09120000002', password: simpleHash('1234'), role: 'barber' },
+      { id: 'u4', name: 'محمد حسینی', phone: '09120000003', password: simpleHash('1234'), role: 'barber' }
+    ];
+
+    let state = {
+      config: { ...DEFAULT_CONFIG },
+      services: [],
+      barbers: [],
+      reviews: [],
+      appointments: [],
+      users: [],
+      currentUser: null,
+      currentBarberId: null,
+      selectedService: null,
+      selectedBarber: null,
+      selectedDate: null,
+      selectedTime: null,
+      bookingStep: 1,
+      theme: 'light',
+      currentPage: 'home'
+    };
+
+    const jMonthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+
+    function isAdmin() { return state.currentUser && state.currentUser.role === 'admin'; }
+    function isManager() { return state.currentUser && (state.currentUser.role === 'manager' || state.currentUser.role === 'admin'); }
+    function isBarber() { return state.currentUser && state.currentUser.role === 'barber'; }
+    function isCustomer() { return state.currentUser && state.currentUser.role === 'customer'; }
+    function canAccessSettings() { return isManager() || isAdmin(); }
+    function canAccessAdmin() { return isManager() || isAdmin() || isBarber(); }
+    function canAccessUsers() { return isAdmin(); }
+
+    function formatPrice(p) { return p.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' تومان'; }
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      if (dateStr.includes('/')) return dateStr;
+      const [gy, gm, gd] = dateStr.split('-').map(Number);
+      return toJalaaliStr(gy, gm, gd);
+    }
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function getJalaaliDayIndex(dateStr) {
+      const jsDay = new Date(dateStr + 'T00:00:00').getDay();
+      return (jsDay + 1) % 7;
+    }
+    function isHoliday(dateStr) {
+      if (!dateStr) return false;
+      const day = getJalaaliDayIndex(dateStr);
+      const holidays = state.config.holidays.split(',').map(s => s.trim()).filter(s => s !== '').map(Number);
+      return holidays.includes(day);
+    }
+    function generateTimeSlots() {
+      const { startTime, endTime, slotInterval } = state.config;
+      if (!startTime || !endTime || slotInterval <= 0) return [];
+      let [h1, m1] = startTime.split(':').map(Number);
+      let [h2, m2] = endTime.split(':').map(Number);
+      if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return [];
+      let start = h1 * 60 + m1;
+      const end = h2 * 60 + m2;
+      if (start >= end) return [];
+      const slots = [];
+      while (start < end) {
+        const hh = String(Math.floor(start / 60)).padStart(2, '0');
+        const mm = String(start % 60).padStart(2, '0');
+        slots.push(`${hh}:${mm}`);
+        start += slotInterval;
+      }
+      return slots;
+    }
+    function isOverlapping(barberId, date, startTime, duration) {
+      const [sh, sm] = startTime.split(':').map(Number);
+      const startMin = sh * 60 + sm;
+      const endMin = startMin + duration;
+      return state.appointments.some(a => {
+        if (a.barberId !== barberId || a.date !== date || a.status === 'cancelled' || a.status === 'rejected') return false;
+        const [ah, am] = a.time.split(':').map(Number);
+        const aStart = ah * 60 + am;
+        const aEnd = aStart + (state.services.find(s => s.id === a.serviceId)?.duration || 30);
+        return (startMin < aEnd && endMin > aStart);
+      });
+    }
+    function isLocked(a) { return a.status === 'rejected' || a.status === 'completed'; }
+
+    async function login(phone, password) {
+      const normalizedPhone = normalizePhone(phone);
+      const hashedPassword = simpleHash(password);
+      const user = state.users.find(u => normalizePhone(u.phone) === normalizedPhone && u.password === hashedPassword);
+      if (!user) return false;
+      state.currentUser = user;
+      if (user.role === 'barber') {
+        const barber = state.barbers.find(b => b.userId === user.phone);
+        state.currentBarberId = barber ? barber.id : null;
+      } else {
+        state.currentBarberId = null;
+      }
+      sessionStorage.setItem('barber_session', user.id);
+      return true;
+    }
+
+    async function register(name, phone, password) {
+      const normalizedPhone = normalizePhone(phone);
+      if (!normalizedPhone || normalizedPhone.length < 10) return false;
+      if (state.users.find(u => normalizePhone(u.phone) === normalizedPhone)) return false;
+      const newUser = {
+        id: uid(),
+        name,
+        phone: normalizedPhone,
+        password: simpleHash(password),
+        role: 'customer'
+      };
+      await supabaseFetch('users', { method: 'POST', body: JSON.stringify(newUser) });
+      state.users.push(newUser);
+      state.currentUser = newUser;
+      state.currentBarberId = null;
+      sessionStorage.setItem('barber_session', newUser.id);
+      return true;
+    }
+
+    function logout() {
+      state.currentUser = null;
+      state.currentBarberId = null;
+      sessionStorage.removeItem('barber_session');
+    }
+
+    function renderAll() {
+      const mainNav = document.getElementById('mainNav');
+      const userBadge = document.getElementById('userBadge');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (!state.currentUser) {
+        document.getElementById('authPage').style.display = 'block';
+        document.getElementById('appPages').style.display = 'none';
+        mainNav.classList.add('hidden');
+        mainNav.classList.remove('open');
+        userBadge.style.display = 'none';
+        userBadge.textContent = '';
+        logoutBtn.style.display = 'none';
+        document.getElementById('navSettings').style.display = 'none';
+        document.getElementById('navAdmin').style.display = 'none';
+        document.getElementById('navUsers').style.display = 'none';
+        document.getElementById('authPage').classList.add('active');
+        return;
+      }
+      document.getElementById('authPage').style.display = 'none';
+      document.getElementById('appPages').style.display = 'block';
+      document.getElementById('authPage').classList.remove('active');
+      mainNav.classList.remove('hidden');
+      const roleMap = { customer: 'مشتری', barber: 'آرایشگر', manager: 'مدیر', admin: 'ادمین' };
+      userBadge.style.display = 'inline-block';
+      userBadge.textContent = state.currentUser.name + ' (' + (roleMap[state.currentUser.role] || '') + ')';
+      logoutBtn.style.display = 'inline-block';
+      document.getElementById('navSettings').style.display = canAccessSettings() ? 'block' : 'none';
+      document.getElementById('navAdmin').style.display = canAccessAdmin() ? 'block' : 'none';
+      document.getElementById('navUsers').style.display = canAccessUsers() ? 'block' : 'none';
+      navigateTo(state.currentPage || 'home');
+    }
+
+    function renderHome() {
+      const svc = document.getElementById('homeServices');
+      svc.innerHTML = state.services.slice(0, 6).map(s => `<div class="service-card" style="cursor:default;"><div class="icon">${s.icon || '💈'}</div><div class="name">${s.name}</div><div class="price">${formatPrice(s.price)}</div><div class="duration">🕒 ${s.duration} دقیقه</div></div>`).join('');
+      const bar = document.getElementById('homeBarbers');
+      bar.innerHTML = state.barbers.map(b => `<div class="barber-card" style="cursor:default;"><div class="avatar">${b.avatar || '👤'}</div><div class="name">${b.name}</div><div class="exp">${b.exp}</div><div class="rating">${'⭐'.repeat(Math.floor(b.rating || 0))} (${b.rating || 0})</div></div>`).join('');
+      const rev = document.getElementById('homeReviews');
+      if (state.reviews.length === 0) rev.innerHTML = `<div class="empty-state"><div style="font-size:4rem;">💬</div><h3>هنوز نظری ثبت نشده</h3></div>`;
+      else rev.innerHTML = state.reviews.slice(0, 5).map(r => `<div class="review-item"><div class="review-header"><span class="name">${r.name}</span><span class="date">${r.date || '—'}</span><span style="color:#f1c40f;">${'⭐'.repeat(r.rating || 0)}</span></div><div class="review-text">${r.text}</div></div>`).join('');
+    }
+
+    function renderBookingServices() {
+      const container = document.getElementById('bookingServices');
+      container.innerHTML = state.services.map(s => `<div class="service-card ${state.selectedService?.id === s.id ? 'selected' : ''}" data-id="${s.id}"><div class="icon">${s.icon || '💈'}</div><div class="name">${s.name}</div><div class="price">${formatPrice(s.price)}</div><div class="duration">🕒 ${s.duration} دقیقه</div></div>`).join('');
+      container.querySelectorAll('.service-card').forEach(el => el.addEventListener('click', () => {
+        state.selectedService = state.services.find(s => s.id === el.dataset.id);
+        renderBookingServices();
+        document.getElementById('bookingNext1').disabled = false;
+      }));
+    }
+
+    function renderBookingBarbers() {
+      const container = document.getElementById('bookingBarbers');
+      container.innerHTML = state.barbers.map(b => `<div class="barber-card ${state.selectedBarber?.id === b.id ? 'selected' : ''}" data-id="${b.id}"><div class="avatar">${b.avatar || '👤'}</div><div class="name">${b.name}</div><div class="exp">${b.exp}</div><div class="rating">${'⭐'.repeat(Math.floor(b.rating || 0))}</div></div>`).join('');
+      container.querySelectorAll('.barber-card').forEach(el => el.addEventListener('click', () => {
+        state.selectedBarber = state.barbers.find(b => b.id === el.dataset.id);
+        state.selectedTime = null;
+        renderBookingBarbers();
+        updateBookingTimes();
+      }));
+    }
+
+    function setupDateSelects() {
+      const today = new Date();
+      const jToday = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+      const yearSelect = document.getElementById('bookingYear');
+      const monthSelect = document.getElementById('bookingMonth');
+      const daySelect = document.getElementById('bookingDay');
+      yearSelect.innerHTML = '';
+      for (let y = jToday.jy; y <= jToday.jy + 2; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        if (y === jToday.jy) opt.selected = true;
+        yearSelect.appendChild(opt);
+      }
+      monthSelect.innerHTML = '';
+      for (let m = 1; m <= 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = jMonthNames[m - 1];
+        if (m === jToday.jm) opt.selected = true;
+        monthSelect.appendChild(opt);
+      }
+      updateDaySelect();
+      updateSelectedDateFromSelects();
+    }
+
+    function updateDaySelect() {
+      const year = parseInt(document.getElementById('bookingYear').value);
+      const month = parseInt(document.getElementById('bookingMonth').value);
+      const daySelect = document.getElementById('bookingDay');
+      const daysInMonth = jalaliMonthLength(year, month);
+      const today = new Date();
+      const jToday = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+      daySelect.innerHTML = '';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        if (d === jToday.jd && year === jToday.jy && month === jToday.jm) opt.selected = true;
+        else if (d === 1 && !(year === jToday.jy && month === jToday.jm)) opt.selected = true;
+        daySelect.appendChild(opt);
+      }
+    }
+
+    function updateSelectedDateFromSelects() {
+      const year = parseInt(document.getElementById('bookingYear').value);
+      const month = parseInt(document.getElementById('bookingMonth').value);
+      const day = parseInt(document.getElementById('bookingDay').value);
+      state.selectedDate = toGregorianStr(year, month, day);
+    }
+
+    function updateBookingTimes() {
+      const date = state.selectedDate;
+      const container = document.getElementById('bookingTimes');
+      if (!date || !state.selectedBarber || isHoliday(date)) {
+        container.innerHTML = isHoliday(date) ? '<span class="text-muted">این روز تعطیل است.</span>' : '<span class="text-muted">آرایشگر و تاریخ را انتخاب کنید.</span>';
+        document.getElementById('bookingNext2').disabled = true;
+        return;
+      }
+      const slots = generateTimeSlots();
+      if (slots.length === 0) {
+        container.innerHTML = '<span class="text-muted">تنظیمات زمانی نامعتبر است.</span>';
+        document.getElementById('bookingNext2').disabled = true;
+        return;
+      }
+      const now = new Date();
+      const today = todayStr();
+      const isToday = (date === today);
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const serviceDuration = state.selectedService ? state.selectedService.duration : 30;
+      const barberId = state.selectedBarber.id;
+      const maxPerHour = state.config.maxPerHour || 4;
+      const grouped = {};
+      slots.forEach(t => {
+        const hour = t.split(':')[0];
+        if (!grouped[hour]) grouped[hour] = [];
+        grouped[hour].push(t);
+      });
+      let html = '';
+      for (const hour in grouped) {
+        const times = grouped[hour];
+        let bookedCountInHour = state.appointments.filter(a => {
+          if (a.barberId !== barberId || a.date !== date || a.status === 'cancelled' || a.status === 'rejected') return false;
+          return a.time.split(':')[0] === hour;
+        }).length;
+        for (const t of times) {
+          const [hh, mm] = t.split(':').map(Number);
+          const isPast = isToday && (hh < currentHour || (hh === currentHour && mm < currentMinute));
+          const overlapping = isOverlapping(barberId, date, t, serviceDuration);
+          const maxReached = bookedCountInHour >= maxPerHour;
+          const disabled = isPast || overlapping || maxReached;
+          const booked = overlapping;
+          const selected = state.selectedTime === t;
+          html += `<div class="time-slot ${booked ? 'booked' : ''} ${selected ? 'selected' : ''} ${disabled && !booked ? 'disabled' : ''}" data-time="${t}">${t}</div>`;
+        }
+      }
+      container.innerHTML = html || '<span class="text-muted">هیچ ساعتی در دسترس نیست.</span>';
+      container.querySelectorAll('.time-slot:not(.booked):not(.disabled)').forEach(el => el.addEventListener('click', () => {
+        state.selectedTime = el.dataset.time;
+        document.querySelectorAll('.time-slot').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('bookingNext2').disabled = false;
+      }));
+      if (state.selectedTime) {
+        const found = container.querySelector(`.time-slot[data-time="${state.selectedTime}"]`);
+        if (!found || found.classList.contains('booked') || found.classList.contains('disabled')) {
+          state.selectedTime = null;
+          document.getElementById('bookingNext2').disabled = true;
+        }
+      }
+    }
+
+    function resetBooking() {
+      state.selectedService = null;
+      state.selectedBarber = null;
+      state.selectedDate = null;
+      state.selectedTime = null;
+      state.bookingStep = 1;
+      document.getElementById('bookingStep1').style.display = 'block';
+      document.getElementById('bookingStep2').style.display = 'none';
+      document.getElementById('bookingStep3').style.display = 'none';
+      document.getElementById('bookingNext1').disabled = true;
+      document.getElementById('bookingNext2').disabled = true;
+      setupDateSelects();
+      document.getElementById('bookingTimes').innerHTML = '';
+      document.getElementById('bookingName').value = state.currentUser ? state.currentUser.name : '';
+      document.getElementById('bookingPhone').value = state.currentUser ? state.currentUser.phone : '';
+      document.getElementById('bookingNote').value = '';
+      renderBookingServices();
+      renderBookingBarbers();
+    }
+
+    function renderAppointments() {
+      const container = document.getElementById('appointmentsList');
+      let userApps;
+      if (isBarber()) userApps = state.appointments.filter(a => a.barberId === state.currentBarberId);
+      else if (isCustomer()) userApps = state.appointments.filter(a => a.customerId === state.currentUser.id || a.customerPhone === state.currentUser.phone);
+      else userApps = [...state.appointments];
+      if (userApps.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div style="font-size:4rem;">📅</div><h3>هیچ نوبتی ندارید</h3></div>`;
+        return;
+      }
+      container.innerHTML = userApps.map((a, idx) => {
+        const service = state.services.find(s => s.id === a.serviceId);
+        const barber = state.barbers.find(b => b.id === a.barberId);
+        const statusMap = { pending: 'در انتظار', confirmed: 'تایید شده', rejected: 'رد شده', completed: 'انجام شده', cancelled: 'لغو شده' };
+        const locked = isLocked(a);
+        const isCancelled = a.status === 'cancelled';
+        const canCancel = !locked && (isCustomer() || isManager() || isAdmin()) && !isCancelled;
+        const canConfirm = !locked && (isBarber() || isManager() || isAdmin()) && !isCancelled;
+        const canReject = !locked && (isBarber() || isManager() || isAdmin()) && !isCancelled;
+        const canComplete = !locked && (isBarber() || isManager() || isAdmin()) && a.status === 'confirmed';
+        const canReview = isCustomer() && a.status === 'completed' && !a.reviewed;
+        return `<div class="appointment-item" style="${isCancelled ? 'opacity:0.5;' : ''}">
+          <div class="info">
+            <div class="title">${service ? service.name : 'نامشخص'} <span class="text-muted" style="font-weight:400;font-size:0.8rem;">${service ? formatPrice(service.price) : ''}</span></div>
+            <div class="sub">👤 ${barber ? barber.name : 'نامشخص'} &bull; 📅 ${formatDate(a.date)} &bull; 🕒 ${a.time}</div>
+            <div class="sub" style="font-size:0.75rem;">${a.customerName} &bull; ${a.customerPhone}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="status ${a.status || 'pending'}">${statusMap[a.status] || a.status}</span>
+            ${!locked ? `<div class="actions">
+              ${canCancel ? `<button class="btn btn-sm btn-danger" data-id="${a.id}" data-action="cancel">❌ لغو</button>` : ''}
+              ${canConfirm ? `<button class="btn btn-sm btn-success" data-id="${a.id}" data-action="confirm">✅ تایید</button>` : ''}
+              ${canReject ? `<button class="btn btn-sm btn-danger" data-id="${a.id}" data-action="reject">❌ رد</button>` : ''}
+              ${canComplete ? `<button class="btn btn-sm btn-gold" data-id="${a.id}" data-action="complete">✅✅ انجام شد</button>` : ''}
+            </div>` : `<span class="badge-pill badge-secondary">قفل شده</span>`}
+            ${canReview ? `<button class="btn btn-sm btn-warning" data-id="${a.id}" data-action="review">⭐ نظر</button>` : ''}
+            ${a.reviewed ? `<span class="badge-pill badge-success">⭐ نظر ثبت</span>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+      container.querySelectorAll('[data-id]').forEach(el => el.addEventListener('click', async () => {
+        const id = el.dataset.id;
+        const action = el.dataset.action;
+        const appt = state.appointments.find(a => a.id === id);
+        if (!appt) return;
+        if (action === 'cancel') {
+          if (confirm('لغو این نوبت؟')) {
+            appt.status = 'cancelled';
+            await updateDocument('appointments', id, { status: 'cancelled' });
+            toast('نوبت لغو شد.', 'warning');
+            renderAppointments();
+          }
+        } else if (action === 'confirm') {
+          if (isLocked(appt)) { toast('این نوبت قفل شده است.', 'warning'); return; }
+          appt.status = 'confirmed';
+          await updateDocument('appointments', id, { status: 'confirmed' });
+          toast('نوبت تایید شد.', 'success');
+          renderAppointments();
+        } else if (action === 'reject') {
+          if (isLocked(appt)) { toast('این نوبت قفل شده است.', 'warning'); return; }
+          appt.status = 'rejected';
+          await updateDocument('appointments', id, { status: 'rejected' });
+          toast('نوبت رد شد.', 'error');
+          renderAppointments();
+        } else if (action === 'complete') {
+          if (appt.status !== 'confirmed') { toast('فقط نوبت‌های تایید شده قابل تکمیل هستند.', 'warning'); return; }
+          appt.status = 'completed';
+          await updateDocument('appointments', id, { status: 'completed' });
+          toast('نوبت انجام شد.', 'success');
+          renderAppointments();
+        } else if (action === 'review') openReviewModal(appt);
+      }));
+    }
+
+    function renderSettings() {
+      if (!canAccessSettings()) return;
+      const c = state.config;
+      document.getElementById('setStartTime').value = c.startTime || '09:00';
+      document.getElementById('setEndTime').value = c.endTime || '21:00';
+      document.getElementById('setSlotInterval').value = c.slotInterval || 30;
+      document.getElementById('setMaxPerHour').value = c.maxPerHour || 4;
+      document.getElementById('setHolidays').value = c.holidays || '5,6';
+      const svcList = document.getElementById('adminServicesList');
+      svcList.innerHTML = state.services.map((s, idx) => `<div class="flex-between" style="border-bottom:1px solid var(--border);padding:8px 0;"><span>${s.icon || '💈'} <strong>${s.name}</strong> — ${formatPrice(s.price)} (${s.duration} دقیقه)</span><div><button class="btn btn-sm btn-outline" data-idx="${idx}" data-action="edit-service">✏️</button><button class="btn btn-sm btn-danger" data-idx="${idx}" data-action="delete-service">🗑️</button></div></div>`).join('');
+      svcList.querySelectorAll('[data-idx]').forEach(el => el.addEventListener('click', async () => {
+        const idx = parseInt(el.dataset.idx);
+        if (el.dataset.action === 'delete-service') {
+          if (confirm(`حذف "${state.services[idx].name}"؟`)) {
+            await deleteDocument('services', state.services[idx].id);
+            state.services.splice(idx, 1);
+            toast('سرویس حذف شد.', 'success');
+            renderSettings();
+          }
+        } else if (el.dataset.action === 'edit-service') openEditServiceModal(idx);
+      }));
+      const barList = document.getElementById('adminBarbersList');
+      barList.innerHTML = state.barbers.map((b, idx) => `<div class="flex-between" style="border-bottom:1px solid var(--border);padding:8px 0;"><span><strong>${b.name}</strong> — ${b.exp} — ⭐ ${b.rating || 0}</span><div><button class="btn btn-sm btn-outline" data-idx="${idx}" data-action="edit-barber">✏️</button><button class="btn btn-sm btn-danger" data-idx="${idx}" data-action="delete-barber">🗑️</button></div></div>`).join('');
+      barList.querySelectorAll('[data-idx]').forEach(el => el.addEventListener('click', async () => {
+        const idx = parseInt(el.dataset.idx);
+        if (el.dataset.action === 'delete-barber') {
+          if (confirm(`حذف "${state.barbers[idx].name}"؟`)) {
+            await deleteDocument('barbers', state.barbers[idx].id);
+            state.barbers.splice(idx, 1);
+            toast('آرایشگر حذف شد.', 'success');
+            renderSettings();
+          }
+        } else if (el.dataset.action === 'edit-barber') openEditBarberModal(idx);
+      }));
+    }
+
+    function renderAdminAppointments() {
+      const tbody = document.getElementById('adminAppointmentsTable');
+      if (!canAccessAdmin()) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">شما به این بخش دسترسی ندارید.</td></tr>`; return; }
+      let list = [...state.appointments];
+      if (isBarber()) list = list.filter(a => a.barberId === state.currentBarberId);
+      if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">هیچ نوبتی وجود ندارد.</td></tr>`; return; }
+      const statusMap = { pending: 'در انتظار', confirmed: 'تایید', rejected: 'رد', completed: 'انجام شده', cancelled: 'لغو شده' };
+      tbody.innerHTML = list.map((a, idx) => {
+        const service = state.services.find(s => s.id === a.serviceId);
+        const barber = state.barbers.find(b => b.id === a.barberId);
+        const locked = isLocked(a);
+        const isCancelled = a.status === 'cancelled';
+        const canCancel = !locked && (isManager() || isAdmin()) && !isCancelled;
+        const canConfirm = !locked && (isBarber() || isManager() || isAdmin()) && !isCancelled;
+        const canReject = !locked && (isBarber() || isManager() || isAdmin()) && !isCancelled;
+        const canComplete = !locked && (isBarber() || isManager() || isAdmin()) && a.status === 'confirmed';
+        return `<tr>
+          <td>${idx + 1}</td>
+          <td>${a.customerName || '—'}</td>
+          <td>${service ? service.name : '—'}</td>
+          <td>${barber ? barber.name : '—'}</td>
+          <td>${formatDate(a.date)}</td>
+          <td>${a.time}</td>
+          <td><span class="badge-pill ${a.status === 'confirmed' ? 'badge-success' : a.status === 'rejected' ? 'badge-danger' : a.status === 'completed' ? 'badge-gold' : a.status === 'cancelled' ? 'badge-secondary' : 'badge-warning'}">${statusMap[a.status] || a.status}</span></td>
+          <td>${!locked ? `${canConfirm ? `<button class="btn btn-sm btn-success" data-id="${a.id}" data-action="admin-confirm">✅</button>` : ''}${canReject ? `<button class="btn btn-sm btn-danger" data-id="${a.id}" data-action="admin-reject">❌</button>` : ''}${canComplete ? `<button class="btn btn-sm btn-gold" data-id="${a.id}" data-action="admin-complete">✅✅</button>` : ''}` : `<span class="badge-pill badge-secondary">قفل</span>`}${canCancel ? `<button class="btn btn-sm btn-danger" data-id="${a.id}" data-action="admin-cancel">🗑️</button>` : ''}</td>
+        </tr>`;
+      }).join('');
+      tbody.querySelectorAll('[data-id]').forEach(el => el.addEventListener('click', async () => {
+        const id = el.dataset.id;
+        const appt = state.appointments.find(a => a.id === id);
+        if (!appt) return;
+        const action = el.dataset.action;
+        if (action === 'admin-cancel') {
+          if (confirm('لغو این نوبت؟')) {
+            appt.status = 'cancelled';
+            await updateDocument('appointments', id, { status: 'cancelled' });
+            toast('نوبت لغو شد.', 'warning');
+            renderAdminAppointments();
+          }
+        } else if (action === 'admin-confirm') {
+          if (isLocked(appt)) { toast('قفل شده', 'warning'); return; }
+          appt.status = 'confirmed';
+          await updateDocument('appointments', id, { status: 'confirmed' });
+          toast('نوبت تایید شد.', 'success');
+          renderAdminAppointments();
+        } else if (action === 'admin-reject') {
+          if (isLocked(appt)) { toast('قفل شده', 'warning'); return; }
+          appt.status = 'rejected';
+          await updateDocument('appointments', id, { status: 'rejected' });
+          toast('نوبت رد شد.', 'error');
+          renderAdminAppointments();
+        } else if (action === 'admin-complete') {
+          if (appt.status !== 'confirmed') { toast('فقط نوبت‌های تایید شده قابل تکمیل هستند.', 'warning'); return; }
+          appt.status = 'completed';
+          await updateDocument('appointments', id, { status: 'completed' });
+          toast('نوبت انجام شد.', 'success');
+          renderAdminAppointments();
+        }
+      }));
+    }
+
+    function renderAdminReviews() {
+      const container = document.getElementById('adminReviewsList');
+      if (!canAccessAdmin()) { container.innerHTML = '<div class="text-muted">دسترسی محدود</div>'; return; }
+      if (state.reviews.length === 0) { container.innerHTML = `<div class="text-muted text-center">هیچ نظری ثبت نشده.</div>`; return; }
+      const canDeleteReview = isManager() || isAdmin();
+      container.innerHTML = state.reviews.map((r, idx) => `<div class="review-item"><div class="review-header"><span class="name">${r.name}</span><span class="date">${r.date || '—'}</span><span style="color:#f1c40f;">${'⭐'.repeat(r.rating || 0)}</span>${canDeleteReview ? `<button class="btn btn-sm btn-danger" data-idx="${idx}" style="margin-right:auto;">🗑️</button>` : ''}</div><div class="review-text">${r.text}</div></div>`).join('');
+      if (canDeleteReview) container.querySelectorAll('.btn-danger[data-idx]').forEach(el => el.addEventListener('click', async () => {
+        const idx = parseInt(el.dataset.idx);
+        if (confirm('حذف این نظر؟')) {
+          await deleteDocument('reviews', state.reviews[idx].id);
+          state.reviews.splice(idx, 1);
+          toast('نظر حذف شد.', 'success');
+          renderAdminReviews();
+        }
+      }));
+    }
+
+    function renderUsersTable() {
+      if (!canAccessUsers()) return;
+      const tbody = document.getElementById('usersTable');
+      if (state.users.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">هیچ کاربری وجود ندارد.</td></tr>`; return; }
+      const roleMap = { customer: 'مشتری', barber: 'آرایشگر', manager: 'مدیر', admin: 'ادمین' };
+      tbody.innerHTML = state.users.map((u, idx) => `<tr><td>${idx + 1}</td><td>${u.name}</td><td>${u.phone}</td><td>${roleMap[u.role] || u.role}</td><td><button class="btn btn-sm btn-outline" data-idx="${idx}" data-action="edit-user">✏️</button>${u.role !== 'admin' ? `<button class="btn btn-sm btn-danger" data-idx="${idx}" data-action="delete-user">🗑️</button>` : ''}</td></tr>`).join('');
+      tbody.querySelectorAll('[data-idx]').forEach(el => el.addEventListener('click', async () => {
+        const idx = parseInt(el.dataset.idx);
+        const user = state.users[idx];
+        if (!user) return;
+        if (el.dataset.action === 'delete-user') {
+          if (confirm(`حذف کاربر "${user.name}"؟`)) {
+            await deleteDocument('users', user.id);
+            state.users.splice(idx, 1);
+            toast('کاربر حذف شد.', 'success');
+            renderUsersTable();
+          }
+        } else if (el.dataset.action === 'edit-user') openEditUserModal(idx);
+      }));
+    }
+
+    function openReviewModal(appt) {
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      title.innerHTML = '⭐ ثبت نظر';
+      let rating = 5;
+      body.innerHTML = `<div class="form-group"><label>امتیاز</label><div class="stars" id="reviewStars">${[1,2,3,4,5].map(n => `<span class="star ${n <= rating ? 'active' : ''}" data-val="${n}">⭐</span>`).join('')}</div></div><div class="form-group"><label>متن نظر</label><textarea class="form-control" id="reviewText" rows="3" placeholder="تجربه خود را بنویسید..."></textarea></div><button class="btn btn-success btn-block" id="reviewSubmit">ثبت نظر</button>`;
+      overlay.classList.add('active');
+      body.querySelectorAll('.star').forEach(el => el.addEventListener('click', () => {
+        rating = parseInt(el.dataset.val);
+        body.querySelectorAll('.star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= rating));
+      }));
+      body.querySelector('#reviewSubmit').addEventListener('click', async () => {
+        const txt = body.querySelector('#reviewText').value.trim();
+        if (!txt) { toast('لطفاً متن نظر را بنویسید.', 'warning'); return; }
+        const now = new Date();
+        const jDate = toJalaaliStr(now.getFullYear(), now.getMonth() + 1, now.getDate());
+        const newReview = { id: uid(), name: appt.customerName || 'مشتری', text: txt, rating, date: jDate };
+        await supabaseFetch('reviews', { method: 'POST', body: JSON.stringify(newReview) });
+        state.reviews.push(newReview);
+        appt.reviewed = true;
+        await updateDocument('appointments', appt.id, { reviewed: true });
+        toast('نظر شما ثبت شد!', 'success');
+        closeModal();
+        renderAppointments();
+      });
+      document.getElementById('modalClose').onclick = closeModal;
+      overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+    }
+
+    function openEditServiceModal(idx) {
+      const s = state.services[idx];
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      title.innerHTML = '✏️ ویرایش سرویس';
+      body.innerHTML = `<div class="form-group"><label>نام</label><input class="form-control" id="esName" value="${s.name}"></div><div class="form-group"><label>قیمت (تومان)</label><input class="form-control" id="esPrice" type="number" value="${s.price}"></div><div class="form-group"><label>مدت (دقیقه)</label><input class="form-control" id="esDuration" type="number" value="${s.duration}"></div><div class="form-group"><label>آیکون (ایموجی)</label><input class="form-control" id="esIcon" value="${s.icon || '💈'}"></div><button class="btn btn-success btn-block" id="esSubmit">ذخیره</button>`;
+      overlay.classList.add('active');
+      body.querySelector('#esSubmit').addEventListener('click', async () => {
+        const name = body.querySelector('#esName').value.trim();
+        const price = parseInt(body.querySelector('#esPrice').value);
+        const duration = parseInt(body.querySelector('#esDuration').value);
+        const icon = body.querySelector('#esIcon').value.trim() || '💈';
+        if (!name || !price || !duration) { toast('تمام فیلدها را پر کنید.', 'warning'); return; }
+        if (price <= 0 || duration <= 0) { toast('قیمت و مدت باید مثبت باشند.', 'warning'); return; }
+        const updatedService = { ...s, name, price, duration, icon };
+        await updateDocument('services', s.id, updatedService);
+        state.services[idx] = updatedService;
+        toast('سرویس بروز شد.', 'success');
+        closeModal();
+        renderSettings();
+      });
+      document.getElementById('modalClose').onclick = closeModal;
+      overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+    }
+
+    function openEditBarberModal(idx) {
+      const b = state.barbers[idx];
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      title.innerHTML = '✏️ ویرایش آرایشگر';
+      body.innerHTML = `<div class="form-group"><label>نام</label><input class="form-control" id="ebName" value="${b.name}"></div><div class="form-group"><label>سابقه</label><input class="form-control" id="ebExp" value="${b.exp}"></div><div class="form-group"><label>امتیاز</label><input class="form-control" id="ebRating" type="number" step="0.1" min="0" max="5" value="${b.rating || 0}"></div><div class="form-group"><label>آواتار (حرف اول)</label><input class="form-control" id="ebAvatar" maxlength="2" value="${b.avatar || ''}"></div><button class="btn btn-success btn-block" id="ebSubmit">ذخیره</button>`;
+      overlay.classList.add('active');
+      body.querySelector('#ebSubmit').addEventListener('click', async () => {
+        const name = body.querySelector('#ebName').value.trim();
+        const exp = body.querySelector('#ebExp').value.trim();
+        const rating = parseFloat(body.querySelector('#ebRating').value) || 0;
+        const avatar = body.querySelector('#ebAvatar').value.trim() || '👤';
+        if (!name || !exp) { toast('نام و سابقه را وارد کنید.', 'warning'); return; }
+        if (rating < 0 || rating > 5) { toast('امتیاز باید بین ۰ و ۵ باشد.', 'warning'); return; }
+        const updatedBarber = { ...b, name, exp, rating, avatar };
+        await updateDocument('barbers', b.id, updatedBarber);
+        state.barbers[idx] = updatedBarber;
+        if (b.userId) {
+          const user = state.users.find(u => u.id === b.userId);
+          if (user) user.name = name;
+        }
+        toast('آرایشگر بروز شد.', 'success');
+        closeModal();
+        renderSettings();
+      });
+      document.getElementById('modalClose').onclick = closeModal;
+      overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+    }
+
+    function openEditUserModal(idx) {
+      const u = state.users[idx];
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      title.innerHTML = '✏️ ویرایش کاربر';
+      const roles = ['customer', 'barber', 'manager', 'admin'];
+      body.innerHTML = `<div class="form-group"><label>نام</label><input class="form-control" id="euName" value="${u.name}"></div><div class="form-group"><label>تلفن</label><input class="form-control" id="euPhone" value="${u.phone}"></div><div class="form-group"><label>رمز عبور (برای تغییر وارد کنید)</label><input class="form-control no-placeholder" id="euPassword" type="password"></div><div class="form-group"><label>نقش</label><select class="form-control" id="euRole">${roles.map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}</select></div><button class="btn btn-success btn-block" id="euSubmit">ذخیره</button>`;
+      overlay.classList.add('active');
+      body.querySelector('#euSubmit').addEventListener('click', async () => {
+        const name = body.querySelector('#euName').value.trim();
+        const phone = normalizePhone(body.querySelector('#euPhone').value.trim());
+        const password = body.querySelector('#euPassword').value.trim();
+        const role = body.querySelector('#euRole').value;
+        if (!name || !phone) { toast('نام و تلفن را وارد کنید.', 'warning'); return; }
+        if (phone.length < 10) { toast('شماره تلفن نامعتبر است.', 'warning'); return; }
+        const duplicate = state.users.find((user, i) => i !== idx && normalizePhone(user.phone) === phone);
+        if (duplicate) { toast('این شماره قبلاً برای کاربر دیگری ثبت شده است.', 'error'); return; }
+        const updatedUser = { ...u, name, phone, password: password ? simpleHash(password) : u.password, role };
+        await updateDocument('users', u.id, updatedUser);
+        state.users[idx] = updatedUser;
+        if (u.id === state.currentUser?.id) {
+          state.currentUser = updatedUser;
+          if (role === 'barber') {
+            const barber = state.barbers.find(b => b.userId === u.phone);
+            state.currentBarberId = barber ? barber.id : null;
+          } else state.currentBarberId = null;
+        }
+        if (u.role === 'barber' && role !== 'barber') {
+          const barberIdx = state.barbers.findIndex(b => b.userId === u.phone);
+          if (barberIdx !== -1) state.barbers.splice(barberIdx, 1);
+        } else if (u.role !== 'barber' && role === 'barber') {
+          state.barbers.push({ id: uid(), name, exp: 'جدید', avatar: name.charAt(0), rating: 0, userId: phone });
+        } else if (u.role === 'barber' && role === 'barber') {
+          const barber = state.barbers.find(b => b.userId === u.phone);
+          if (barber) barber.name = name;
+        }
+        toast('کاربر بروز شد.', 'success');
+        closeModal();
+        renderUsersTable();
+      });
+      document.getElementById('modalClose').onclick = closeModal;
+      overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+    }
+
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+    async function addBarberWithAccount(name, exp, rating, avatar, phone, password) {
+      const normalizedPhone = normalizePhone(phone);
+      if (!normalizedPhone || normalizedPhone.length < 10) { toast('شماره تلفن نامعتبر است.', 'error'); return false; }
+      if (state.users.find(u => normalizePhone(u.phone) === normalizedPhone)) { toast('این شماره قبلاً ثبت شده است.', 'error'); return false; }
+      const newUser = { id: uid(), name, phone: normalizedPhone, password: simpleHash(password), role: 'barber' };
+      await supabaseFetch('users', { method: 'POST', body: JSON.stringify(newUser) });
+      state.users.push(newUser);
+      const newBarber = { id: uid(), name, exp, avatar: avatar || '👤', rating: rating || 0, userId: normalizedPhone };
+      await supabaseFetch('barbers', { method: 'POST', body: JSON.stringify(newBarber) });
+      state.barbers.push(newBarber);
+      return true;
+    }
+
+    function navigateTo(page) {
+      if (page === 'settings' && !canAccessSettings()) { toast('شما به این صفحه دسترسی ندارید.', 'error'); page = 'home'; }
+      if (page === 'admin' && !canAccessAdmin()) { toast('شما به این صفحه دسترسی ندارید.', 'error'); page = 'home'; }
+      if (page === 'users' && !canAccessUsers()) { toast('شما به این صفحه دسترسی ندارید.', 'error'); page = 'home'; }
+      state.currentPage = page;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const el = document.getElementById(`page-${page}`);
+      if (el) el.classList.add('active');
+      document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('active', a.dataset.page === page));
+      document.getElementById('mainNav').classList.remove('open');
+      if (page === 'home') renderHome();
+      else if (page === 'booking') resetBooking();
+      else if (page === 'appointments') renderAppointments();
+      else if (page === 'settings') renderSettings();
+      else if (page === 'admin') { renderAdminAppointments(); renderAdminReviews(); }
+      else if (page === 'users') renderUsersTable();
+    }
+
+    function applyTheme(theme) {
+      const darkStyles = `:root[data-theme="dark"] { --bg: #1a1a2e; --card: #2a2a4e; --text: #f0f0f0; --text-light: #c0c0d0; --text-muted: #8888aa; --border: #444466; --shadow: 0 10px 40px rgba(0,0,0,0.3); --shadow-hover: 0 15px 50px rgba(0,0,0,0.4); --primary: #1a1a2e; --primary-light: #2a2a4e; }`;
+      let styleEl = document.getElementById('dark-theme-style');
+      if (theme === 'dark') {
+        if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dark-theme-style'; document.head.appendChild(styleEl); }
+        styleEl.textContent = darkStyles;
+      } else if (styleEl) styleEl.textContent = '';
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    function toast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span class="toast-msg">${msg}</span><span class="toast-close">✖</span>`;
+      el.querySelector('.toast-close').addEventListener('click', () => el.remove());
+      container.appendChild(el);
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 4000);
+    }
+
+    async function init() {
+      await loadAllData();
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const next = state.theme === 'dark' ? 'light' : 'dark';
+        state.theme = next;
+        localStorage.setItem('barber_theme', next);
+        applyTheme(next);
+        document.getElementById('themeToggle').innerHTML = next === 'dark' ? '☀️' : '🌙';
+      });
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('mainNav').classList.toggle('open');
+      });
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        closeModal();
+        logout();
+        renderAll();
+        toast('خارج شدید.', 'info');
+      });
+      document.querySelectorAll('.auth-tabs button').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        document.getElementById(tab === 'login' ? 'loginForm' : 'registerForm').classList.add('active');
+        document.getElementById('loginError').innerHTML = '';
+        document.getElementById('registerError').innerHTML = '';
+      }));
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        const phone = document.getElementById('loginPhone').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        if (!phone || !password) { document.getElementById('loginError').innerHTML = 'لطفاً تمام فیلدها را پر کنید.'; return; }
+        if (await login(phone, password)) {
+          document.getElementById('loginError').innerHTML = '';
+          renderAll();
+          toast('ورود موفق!', 'success');
+        } else {
+          document.getElementById('loginError').innerHTML = 'شماره یا رمز عبور اشتباه است.';
+        }
+      });
+      document.getElementById('registerBtn').addEventListener('click', async () => {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const password = document.getElementById('regPassword').value.trim();
+        if (!name || !phone || !password) { document.getElementById('registerError').innerHTML = 'لطفاً تمام فیلدها را پر کنید.'; return; }
+        if (password.length < 4) { document.getElementById('registerError').innerHTML = 'رمز عبور حداقل ۴ کاراکتر باشد.'; return; }
+        if (await register(name, phone, password)) {
+          document.getElementById('registerError').innerHTML = '';
+          renderAll();
+          toast('ثبت‌نام موفق!', 'success');
+        } else {
+          document.getElementById('registerError').innerHTML = 'این شماره قبلاً ثبت شده است یا نامعتبر است.';
+        }
+      });
+      document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo(a.dataset.page);
+      }));
+      document.getElementById('bookingNext1').addEventListener('click', () => {
+        if (!state.selectedService) { toast('لطفاً سرویس را انتخاب کنید.', 'warning'); return; }
+        state.bookingStep = 2;
+        document.getElementById('bookingStep1').style.display = 'none';
+        document.getElementById('bookingStep2').style.display = 'block';
+        document.getElementById('bookingStep3').style.display = 'none';
+        renderBookingBarbers();
+        setupDateSelects();
+        updateBookingTimes();
+      });
+      document.getElementById('bookingBack1').addEventListener('click', () => {
+        state.bookingStep = 1;
+        document.getElementById('bookingStep1').style.display = 'block';
+        document.getElementById('bookingStep2').style.display = 'none';
+        document.getElementById('bookingStep3').style.display = 'none';
+      });
+      document.getElementById('bookingYear').addEventListener('change', () => {
+        updateDaySelect();
+        updateSelectedDateFromSelects();
+        state.selectedTime = null;
+        updateBookingTimes();
+      });
+      document.getElementById('bookingMonth').addEventListener('change', () => {
+        updateDaySelect();
+        updateSelectedDateFromSelects();
+        state.selectedTime = null;
+        updateBookingTimes();
+      });
+      document.getElementById('bookingDay').addEventListener('change', () => {
+        updateSelectedDateFromSelects();
+        state.selectedTime = null;
+        updateBookingTimes();
+      });
+      document.getElementById('bookingNext2').addEventListener('click', () => {
+        if (!state.selectedBarber) { toast('آرایشگر را انتخاب کنید.', 'warning'); return; }
+        if (!state.selectedDate) { toast('تاریخ را انتخاب کنید.', 'warning'); return; }
+        if (!state.selectedTime) { toast('ساعت را انتخاب کنید.', 'warning'); return; }
+        if (isHoliday(state.selectedDate)) { toast('این روز تعطیل است.', 'error'); return; }
+        const duration = state.selectedService ? state.selectedService.duration : 30;
+        if (isOverlapping(state.selectedBarber.id, state.selectedDate, state.selectedTime, duration)) {
+          toast('این زمان با نوبت دیگری تداخل دارد.', 'error');
+          return;
+        }
+        state.bookingStep = 3;
+        document.getElementById('bookingStep1').style.display = 'none';
+        document.getElementById('bookingStep2').style.display = 'none';
+        document.getElementById('bookingStep3').style.display = 'block';
+      });
+      document.getElementById('bookingBack2').addEventListener('click', () => {
+        state.bookingStep = 2;
+        document.getElementById('bookingStep1').style.display = 'none';
+        document.getElementById('bookingStep2').style.display = 'block';
+        document.getElementById('bookingStep3').style.display = 'none';
+      });
+      document.getElementById('bookingSubmit').addEventListener('click', async () => {
+        const name = document.getElementById('bookingName').value.trim() || state.currentUser.name;
+        const phone = normalizePhone(document.getElementById('bookingPhone').value.trim()) || state.currentUser.phone;
+        if (!name || !phone) { toast('نام و شماره تماس را وارد کنید.', 'warning'); return; }
+        const duration = state.selectedService ? state.selectedService.duration : 30;
+        if (isOverlapping(state.selectedBarber.id, state.selectedDate, state.selectedTime, duration)) {
+          toast('این زمان دیگر در دسترس نیست.', 'error');
+          return;
+        }
+        const newAppointment = {
+          id: uid(),
+          customerId: state.currentUser.id,
+          customerName: name,
+          customerPhone: phone,
+          serviceId: state.selectedService.id,
+          barberId: state.selectedBarber.id,
+          date: state.selectedDate,
+          time: state.selectedTime,
+          note: document.getElementById('bookingNote').value.trim(),
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          reviewed: false
+        };
+        await supabaseFetch('appointments', { method: 'POST', body: JSON.stringify(newAppointment) });
+        state.appointments.push(newAppointment);
+        toast('✅ نوبت شما با موفقیت ثبت شد!', 'success');
+        resetBooking();
+        navigateTo('appointments');
+      });
+      document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+        if (!canAccessSettings()) { toast('دسترسی محدود.', 'error'); return; }
+        const start = document.getElementById('setStartTime').value;
+        const end = document.getElementById('setEndTime').value;
+        const interval = parseInt(document.getElementById('setSlotInterval').value);
+        const maxPerHour = parseInt(document.getElementById('setMaxPerHour').value);
+        const holidays = document.getElementById('setHolidays').value.trim();
+        if (!start || !end || !interval || !maxPerHour) { toast('تمام فیلدها را پر کنید.', 'warning'); return; }
+        if (interval <= 0 || maxPerHour <= 0) { toast('فاصله نوبت‌ها و حداکثر نوبت باید مثبت باشند.', 'warning'); return; }
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        if (sh * 60 + sm >= eh * 60 + em) { toast('ساعت شروع باید قبل از پایان باشد.', 'warning'); return; }
+        state.config = { startTime: start, endTime: end, slotInterval: interval, maxPerHour: maxPerHour, holidays: holidays || '5,6' };
+        await supabaseFetch('config?select=*', { method: 'POST', body: JSON.stringify(state.config) });
+        document.getElementById('settingsStatus').innerHTML = '✅ تنظیمات ذخیره شد.';
+        toast('تنظیمات ذخیره شد.', 'success');
+      });
+      document.getElementById('adminAddService').addEventListener('click', () => {
+        if (!canAccessSettings()) { toast('دسترسی محدود.', 'error'); return; }
+        const overlay = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        title.innerHTML = '➕ سرویس جدید';
+        body.innerHTML = `<div class="form-group"><label>نام</label><input class="form-control" id="nsName" placeholder="نام سرویس"></div><div class="form-group"><label>قیمت (تومان)</label><input class="form-control" id="nsPrice" type="number" placeholder="۱۵۰۰۰۰"></div><div class="form-group"><label>مدت (دقیقه)</label><input class="form-control" id="nsDuration" type="number" placeholder="۳۰"></div><div class="form-group"><label>آیکون (ایموجی)</label><input class="form-control" id="nsIcon" value="💈"></div><button class="btn btn-success btn-block" id="nsSubmit">افزودن</button>`;
+        overlay.classList.add('active');
+        body.querySelector('#nsSubmit').addEventListener('click', async () => {
+          const name = body.querySelector('#nsName').value.trim();
+          const price = parseInt(body.querySelector('#nsPrice').value);
+          const duration = parseInt(body.querySelector('#nsDuration').value);
+          const icon = body.querySelector('#nsIcon').value.trim() || '💈';
+          if (!name || !price || !duration) { toast('تمام فیلدها را پر کنید.', 'warning'); return; }
+          if (price <= 0 || duration <= 0) { toast('قیمت و مدت باید مثبت باشند.', 'warning'); return; }
+          const newService = { id: uid(), name, price, duration, icon };
+          await supabaseFetch('services', { method: 'POST', body: JSON.stringify(newService) });
+          state.services.push(newService);
+          toast('سرویس اضافه شد.', 'success');
+          closeModal();
+          renderSettings();
+        });
+        document.getElementById('modalClose').onclick = closeModal;
+        overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+      });
+      document.getElementById('adminAddBarber').addEventListener('click', () => {
+        if (!canAccessSettings()) { toast('دسترسی محدود.', 'error'); return; }
+        const overlay = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        title.innerHTML = '➕ افزودن آرایشگر';
+        body.innerHTML = `<div class="form-group"><label>نام کامل</label><input class="form-control" id="nbName" placeholder="نام آرایشگر"></div><div class="form-group"><label>سابقه</label><input class="form-control" id="nbExp" placeholder="مثال: ۵ سال"></div><div class="form-group"><label>امتیاز (۰-۵)</label><input class="form-control" id="nbRating" type="number" step="0.1" min="0" max="5" value="4.5"></div><div class="form-group"><label>آواتار (حرف اول)</label><input class="form-control" id="nbAvatar" maxlength="2" placeholder="ع"></div><div class="form-group"><label>شماره تلفن</label><input class="form-control" id="nbPhone" placeholder="۰۹۱۲..."></div><div class="form-group"><label>رمز عبور (برای ورود آرایشگر)</label><input class="form-control no-placeholder" id="nbPassword" type="password"></div><button class="btn btn-success btn-block" id="nbSubmit">افزودن</button>`;
+        overlay.classList.add('active');
+        body.querySelector('#nbSubmit').addEventListener('click', async () => {
+          const name = body.querySelector('#nbName').value.trim();
+          const exp = body.querySelector('#nbExp').value.trim();
+          const rating = parseFloat(body.querySelector('#nbRating').value) || 0;
+          const avatar = body.querySelector('#nbAvatar').value.trim() || '👤';
+          const phone = body.querySelector('#nbPhone').value.trim();
+          const password = body.querySelector('#nbPassword').value.trim();
+          if (!name || !exp || !phone || !password) { toast('تمام فیلدها را پر کنید.', 'warning'); return; }
+          if (password.length < 4) { toast('رمز عبور حداقل ۴ کاراکتر باشد.', 'warning'); return; }
+          if (rating < 0 || rating > 5) { toast('امتیاز باید بین ۰ و ۵ باشد.', 'warning'); return; }
+          if (await addBarberWithAccount(name, exp, rating, avatar, phone, password)) {
+            toast('آرایشگر و حساب کاربری با موفقیت ساخته شد.', 'success');
+            closeModal();
+            renderSettings();
+          }
+        });
+        document.getElementById('modalClose').onclick = closeModal;
+        overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+      });
+      document.getElementById('addUserBtn').addEventListener('click', () => {
+        if (!canAccessUsers()) { toast('دسترسی محدود.', 'error'); return; }
+        const overlay = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        title.innerHTML = '➕ کاربر جدید';
+        body.innerHTML = `<div class="form-group"><label>نام</label><input class="form-control" id="nuName" placeholder="نام کامل"></div><div class="form-group"><label>تلفن</label><input class="form-control" id="nuPhone" placeholder="۰۹۱۲۳۴۵۶۷۸۹"></div><div class="form-group"><label>رمز عبور</label><input class="form-control no-placeholder" id="nuPassword" type="password"></div><div class="form-group"><label>نقش</label><select class="form-control" id="nuRole"><option value="customer">مشتری</option><option value="barber">آرایشگر</option><option value="manager">مدیر</option><option value="admin">ادمین</option></select></div><button class="btn btn-success btn-block" id="nuSubmit">افزودن</button>`;
+        overlay.classList.add('active');
+        body.querySelector('#nuSubmit').addEventListener('click', async () => {
+          const name = body.querySelector('#nuName').value.trim();
+          const phone = normalizePhone(body.querySelector('#nuPhone').value.trim());
+          const password = body.querySelector('#nuPassword').value.trim();
+          const role = body.querySelector('#nuRole').value;
+          if (!name || !phone || !password) { toast('تمام فیلدها را پر کنید.', 'warning'); return; }
+          if (phone.length < 10) { toast('شماره تلفن نامعتبر است.', 'warning'); return; }
+          if (state.users.find(u => normalizePhone(u.phone) === phone)) { toast('این شماره قبلاً ثبت شده است.', 'error'); return; }
+          const newUser = { id: uid(), name, phone, password: simpleHash(password), role };
+          await supabaseFetch('users', { method: 'POST', body: JSON.stringify(newUser) });
+          state.users.push(newUser);
+          if (role === 'barber') {
+            const newBarber = { id: uid(), name, exp: 'جدید', avatar: name.charAt(0), rating: 0, userId: phone };
+            await supabaseFetch('barbers', { method: 'POST', body: JSON.stringify(newBarber) });
+            state.barbers.push(newBarber);
+          }
+          toast('کاربر اضافه شد.', 'success');
+          closeModal();
+          renderUsersTable();
+        });
+        document.getElementById('modalClose').onclick = closeModal;
+        overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+      });
+      document.getElementById('adminExport').addEventListener('click', () => {
+        if (!canAccessAdmin()) { toast('دسترسی محدود.', 'error'); return; }
+        let rows = state.appointments;
+        if (isBarber()) rows = rows.filter(a => a.barberId === state.currentBarberId);
+        const escapeCsv = (val) => `"${String(val).replace(/"/g, '""')}"`;
+        let csv = 'مشتری,سرویس,آرایشگر,تاریخ,ساعت,وضعیت\n';
+        rows.forEach(a => {
+          const service = state.services.find(s => s.id === a.serviceId);
+          const barber = state.barbers.find(b => b.id === a.barberId);
+          csv += `${escapeCsv(a.customerName || '—')},${escapeCsv(service ? service.name : '—')},${escapeCsv(barber ? barber.name : '—')},${escapeCsv(a.date)},${escapeCsv(a.time)},${escapeCsv(a.status)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `nobat_${todayStr()}.csv`;
+        link.click();
+        toast('خروجی دانلود شد.', 'success');
+      });
+      renderAll();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
